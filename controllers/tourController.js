@@ -17,14 +17,39 @@ const Tour = require("./../models/tourModel");
 
 const getTours = async (req, res) => {
   try {
+    // Exclude from params
+    // excluding query params
     const queryParams = { ...req.query };
     const excludedFields = ["page", "sort", "fields", "limit"];
-
     excludedFields.forEach(el => {
       delete queryParams[el];
     });
 
-    const query = Tour.find(queryParams);
+    // replace the operators
+    let queryStr = JSON.stringify(queryParams);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, str => {
+      return `$${str}`;
+    });
+
+    // make query
+    let query = Tour.find(JSON.parse(queryStr));
+
+    // Sorting
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(",").join(" ");
+      // console.log(sortBy);
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort("createdAt");
+    }
+
+    // Excluding fields
+    if (req.query.fields) {
+      const fields = req.query.fields.split(",").join(" ");
+      query = query.select(fields);
+    } else {
+      query = query.select("-__v");
+    }
 
     const tours = await query;
 
@@ -37,7 +62,7 @@ const getTours = async (req, res) => {
   } catch (error) {
     res.status(404).json({
       status: "fail",
-      mesaage: "Could not fetch tours"
+      mesaage: error
     });
   }
 };
