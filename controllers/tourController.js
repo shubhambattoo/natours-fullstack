@@ -17,7 +17,16 @@ const Tour = require("./../models/tourModel");
 
 const getTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    const queryParams = { ...req.query };
+    const excludedFields = ["page", "sort", "fields", "limit"];
+
+    excludedFields.forEach(el => {
+      delete queryParams[el];
+    });
+
+    const query = Tour.find(queryParams);
+
+    const tours = await query;
 
     res.json({
       status: "success",
@@ -100,7 +109,6 @@ const deleteTour = async (req, res) => {
       status: "success",
       data: null
     });
-
   } catch (error) {
     res.status(404).json({
       status: "fail",
