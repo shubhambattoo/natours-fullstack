@@ -15,6 +15,15 @@ const Tour = require("./../models/tourModel");
 //   }
 // }
 
+const aliasTopTours = async (req, res, next) => {
+  req.query = {
+    sort: "price -ratingsAverage",
+    limit: "5",
+    fields: "name,price, duration, summary, ratingsAverage"
+  };
+  next();
+};
+
 const getTours = async (req, res) => {
   try {
     // Exclude from params
@@ -160,5 +169,6 @@ module.exports = {
   createTour,
   getTours,
   updateTour,
-  deleteTour
+  deleteTour,
+  aliasTopTours
 };
