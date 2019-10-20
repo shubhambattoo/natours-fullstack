@@ -50,6 +50,10 @@ const tourSchema = new mongoose.Schema(
     startDates: [Date],
     slug: {
       type: String
+    },
+    secretTour: {
+      type: Boolean,
+      default: false
     }
   },
   {
@@ -59,10 +63,12 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+// VIRTUAL Properties
 tourSchema.virtual("durationWeeks").get(function() {
   return this.duration / 7;
 });
 
+// DOCUMENT Middleware
 tourSchema.pre("save", function(next) {
   const doc = this;
   doc.slug = slugify(doc.name, { lower: true });
@@ -73,6 +79,18 @@ tourSchema.pre("save", function(next) {
 //   console.log(doc, "doc saved");
 //   next();
 // })
+
+// QUERY Middleware
+tourSchema.pre(/^find/, function(next) {
+  this.find({ secretTour: { $ne: true } });
+  this.start = Date.now();
+  next();
+});
+
+// tourSchema.post(/^find/, function(docs, next) {
+//   console.log(docs)
+//   next();
+// });
 
 const Tour = new mongoose.model("Tour", tourSchema);
 
