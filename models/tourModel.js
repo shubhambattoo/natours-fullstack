@@ -18,7 +18,11 @@ const tourSchema = new mongoose.Schema(
     },
     difficulty: {
       type: String,
-      required: [true, "it should have a difficulty"]
+      required: [true, "it should have a difficulty"],
+      enum: {
+        values: ["easy", "medium", "difficult"],
+        message: "Difficulty is either: easy, medium, difficult"
+      }
     },
     price: {
       type: Number,
@@ -26,13 +30,24 @@ const tourSchema = new mongoose.Schema(
     },
     ratingsAverage: {
       type: Number,
-      default: 4.5
+      default: 4.5,
+      min: [1, "Rating must be above 1"],
+      max: [5, "Rating must be less than or equal to 5"]
     },
     ratingsQuantity: {
       type: Number,
       default: 0
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function(val) {
+          // wont work on update
+          return val < this.price;
+        },
+        message: "Discount price ({VALUE}) should be below regular price"
+      }
+    },
     summary: {
       type: String,
       trim: true,
@@ -91,6 +106,11 @@ tourSchema.pre(/^find/, function(next) {
 //   console.log(docs)
 //   next();
 // });
+
+// AGGREGATION Middleware
+tourSchema.pre("aggregate", function(next) {
+  next();
+});
 
 const Tour = new mongoose.model("Tour", tourSchema);
 
