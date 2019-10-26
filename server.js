@@ -1,21 +1,39 @@
 const dotenv = require("dotenv");
+
 dotenv.config({ path: "./config.env" });
 const mongoose = require("mongoose");
 
-mongoose.connect(process.env.DATABASE_LOCAL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify : false,
-  useCreateIndex : true
-}).then(() => {
-  console.log("db connected successfully")
-}).catch((err) => {
-  console.log(err);
-})
+process.on("uncaughtException", err => {
+  console.log("Unhandler Exception! Shutting Down...");
+  console.log(err.name, err.message);
+  process.exit(1);
+});
+
+mongoose
+  .connect(process.env.DATABASE_LOCAL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true
+  })
+  .then(() => {
+    console.log("db connected successfully");
+  })
+  .catch(err => {
+    console.log(err);
+  });
 
 const app = require("./app");
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log("server started on " + port);
+const server = app.listen(port, () => {
+  console.log(`server started on ${port}`);
+});
+
+process.on("unhandledRejection", err => {
+  console.log("Unhandler Rejection! Shutting Down...");
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
 });
