@@ -112,6 +112,7 @@ tourSchema.pre("aggregate", function(next) {
   next();
 });
 
+// eslint-disable-next-line new-cap
 const Tour = new mongoose.model("Tour", tourSchema);
 
 module.exports = Tour;
