@@ -36,6 +36,12 @@ const handleValidationErrorDB = err => {
   return new AppError(message, 400);
 };
 
+const handleTokenError = () =>
+  new AppError("User is not authorised. Log in again", 401);
+
+const handleTokenExpiredError = () =>
+  new AppError("User is not authorised. Token Expired. Log in again", 401);
+
 /**
  * Send Error response while in prod env
  * @description Contains to blocks of code, first block
@@ -82,6 +88,11 @@ module.exports = (err, req, res, next) => {
 
     if (error.name === "ValidationError")
       error = handleValidationErrorDB(error);
+
+    if (error.name === "JsonWebTokenError") error = handleTokenError(error);
+
+    if (error.name === "TokenExpiredError")
+      error = handleTokenExpiredError(error);
 
     sendErrorProd(error, res);
   }

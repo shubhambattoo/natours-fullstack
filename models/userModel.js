@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
@@ -15,6 +16,11 @@ const userSchema = new mongoose.Schema({
     validate: [validator.isEmail, "Please provide a valid email"]
   },
   photo: String,
+  role: {
+    type: String,
+    enum: ["user", "guide", "lead-guide", "admin"],
+    default: "user"
+  },
   password: {
     type: String,
     required: [true, "a password is required"],
@@ -31,7 +37,10 @@ const userSchema = new mongoose.Schema({
       },
       message: "password should match the confirm password"
     }
-  }
+  },
+  passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date
 });
 
 userSchema.pre("save", async function(next) {
@@ -51,6 +60,29 @@ userSchema.pre("save", async function(next) {
 
 userSchema.methods.comparePassword = async function(password, hashPassword) {
   return await bcrypt.compare(password, hashPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    // console.log(this.passwordChangedAt, JWTTimestamp);
+    const d = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+    return JWTTimestamp < d;
+  }
+
+  return false;
+};
+
+userSchema.methods.createPasswordResetToken = function() {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  this.passwordResetExpires = Date.now() + 600000;
+
+  return resetToken;
 };
 
 // eslint-disable-next-line new-cap
