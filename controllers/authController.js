@@ -106,7 +106,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     return next(new AppError("no user with the email id found", 404));
   }
 
-  
-
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
 });
+
 exports.resetPassword = (req, res, next) => {};
