@@ -12,6 +12,16 @@ const signToken = (id, email) => {
   });
 };
 
+const createAndSendToken = (user, statusCode, res, sendUser = false) => {
+  const token = signToken(user._id, user.email);
+  let response = {
+    status: "success",
+    token
+  };
+  response = sendUser ? { ...response, data: { user } } : response;
+  res.status(statusCode).json(response);
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -20,16 +30,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
     passwordChangedAt: req.body.passwordChangedAt
   });
-
-  const token = signToken(newUser._id, newUser.email);
-
-  res.status(201).json({
-    status: "success",
-    token,
-    data: {
-      user: newUser
-    }
-  });
+  createAndSendToken(newUser, 201, res, true);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -44,12 +45,7 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!user || !(await user.comparePassword(password, user.password))) {
     return next(new AppError(`Incorrect email or password`, 401));
   }
-
-  const token = signToken(user._id, user.email);
-  res.status(200).json({
-    status: "success",
-    token
-  });
+  createAndSendToken(user, 200, res);
 });
 
 exports.protecc = catchAsync(async (req, res, next) => {
@@ -160,9 +156,29 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   await user.save();
   // update the password and changedPasswordAt
   // log the user in, send JWT
-  const token = signToken(user._id, user.email);
-  res.status(200).json({
-    status: "success",
-    token
-  });
+  createAndSendToken(user, 200, res);
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // get user from collection
+  const user = await User.findById(req.user.id).select("+password");
+
+  if (!user) {
+    return next(new AppError("user not found", 404));
+  }
+  // check if posted current password is correct
+  const isCorrect = await user.comparePassword(
+    req.body.passwordCurrent,
+    user.password
+  );
+
+  if (!isCorrect) {
+    return next(new AppError("passwords do not match with the current", 401));
+  }
+  // if so update password
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  await user.save();
+  // log user in send JWT
+  createAndSendToken(user, 201, res);
 });

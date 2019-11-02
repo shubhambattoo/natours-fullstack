@@ -1,5 +1,16 @@
 const User = require("./../models/userModel");
 const catchAsync = require("./../utils/catchAsync");
+const AppError = require("./../utils/appError");
+
+const filterObj = function(obj, ...allowed) {
+  const newObj = {};
+  Object.keys(obj).forEach(el => {
+    if (allowed.includes(el)) {
+      newObj[el] = obj[el];
+    }
+  });
+  return newObj;
+};
 
 const getUsers = catchAsync(async (req, res) => {
   const users = await User.find();
@@ -9,6 +20,26 @@ const getUsers = catchAsync(async (req, res) => {
     results: users.length,
     data: {
       users
+    }
+  });
+});
+
+const updateMe = catchAsync(async (req, res, next) => {
+  // if the user tries to update password : ERROR
+  if (req.body.password || req.body.passwordConfirm) {
+    return next(new AppError("Cannot update password with this one", 400));
+  }
+  // update the user document
+  const user = filterObj(req.body, "name", "email");
+  const upUser = await User.findByIdAndUpdate(req.user.id, user, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      user: upUser
     }
   });
 });
@@ -46,5 +77,6 @@ module.exports = {
   createUser,
   getUsers,
   updateUser,
-  deleteUser
+  deleteUser,
+  updateMe
 };
