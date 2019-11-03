@@ -1,8 +1,10 @@
+/* eslint-disable no-console */
 const fs = require("fs");
-const Tour = require("./../../models/tourModel");
 const dotenv = require("dotenv");
+
 dotenv.config({ path: "./config.env" });
 const mongoose = require("mongoose");
+const Tour = require("./../../models/tourModel");
 
 mongoose
   .connect(process.env.DATABASE_LOCAL, {
@@ -19,9 +21,7 @@ mongoose
   });
 
 // read json file
-const tours = JSON.parse(
-  fs.readFileSync(__dirname + "/tours-simple.json", "utf-8")
-);
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, "utf-8"));
 
 // import data into db
 const importData = async () => {
