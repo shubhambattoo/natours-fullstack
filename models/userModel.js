@@ -40,7 +40,12 @@ const userSchema = new mongoose.Schema({
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
-  passwordResetExpires: Date
+  passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false
+  }
 });
 
 userSchema.pre("save", async function(next) {
@@ -93,6 +98,12 @@ userSchema.methods.createPasswordResetToken = function() {
 
   return resetToken;
 };
+
+userSchema.pre(/^find/, function(next) {
+  // this = current query
+  this.find({ active: { $ne: false } });
+  next();
+});
 
 // eslint-disable-next-line new-cap
 const User = new mongoose.model("User", userSchema);
