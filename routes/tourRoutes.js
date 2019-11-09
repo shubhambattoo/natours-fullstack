@@ -1,23 +1,35 @@
 const express = require("express");
 const tourController = require("./../controllers/tourController");
 const authController = require("./../controllers/authController");
+const reviewRouter = require("./reviewRoutes");
 
-const Router = express.Router();
+const router = express.Router();
 
 // Router.param("id", tourController.checkId);
-Router.route("/top-5-cheap").get(
-  tourController.aliasTopTours,
-  tourController.getTours
-);
+// router
+//   .route("/:tourId/reviews")
+//   .post(
+//     authController.protecc,
+//     authController.restricTo("user"),
+//     reviewController.createReview
+//   );
 
-Router.route("/tour-stats").get(tourController.getTourStats);
-Router.route("/monthly-plan/:year").get(tourController.getMonthlyPlan);
+router.use("/:tourId/reviews", reviewRouter);
 
-Router.route("/")
+router
+  .route("/top-5-cheap")
+  .get(tourController.aliasTopTours, tourController.getTours);
+
+router.route("/tour-stats").get(tourController.getTourStats);
+router.route("/monthly-plan/:year").get(tourController.getMonthlyPlan);
+
+router
+  .route("/")
   .get(authController.protecc, tourController.getTours)
   .post(tourController.createTour);
 
-Router.route("/:id")
+router
+  .route("/:id")
   .get(tourController.getTour)
   .patch(tourController.updateTour)
   .delete(
@@ -26,4 +38,4 @@ Router.route("/:id")
     tourController.deleteTour
   );
 
-module.exports = Router;
+module.exports = router;
