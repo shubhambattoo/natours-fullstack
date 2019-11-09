@@ -10,15 +10,15 @@ router.post("/login", authController.login);
 router.post("/forgotPassword", authController.forgotPassword);
 
 router.patch("/resetPassword/:token", authController.resetPassword);
-router.patch(
-  "/updateMyPassword",
-  authController.protecc,
-  authController.updatePassword
-);
 
-router.patch("/updateMe", authController.protecc, userController.updateMe);
+router.use(authController.protecc);
 
-router.delete("/deleteMe", authController.protecc, userController.deleteMe);
+router.patch("/updateMyPassword", authController.updatePassword);
+router.get("/me", userController.getMe, userController.getUser);
+router.patch("/updateMe", userController.updateMe);
+router.delete("/deleteMe", userController.deleteMe);
+
+router.use(authController.restricTo("admin"));
 
 router
   .route("/")

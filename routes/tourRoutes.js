@@ -21,17 +21,31 @@ router
   .get(tourController.aliasTopTours, tourController.getTours);
 
 router.route("/tour-stats").get(tourController.getTourStats);
-router.route("/monthly-plan/:year").get(tourController.getMonthlyPlan);
+router
+  .route("/monthly-plan/:year")
+  .get(
+    authController.protecc,
+    authController.restricTo("admin", "lead-guides", "guides"),
+    tourController.getMonthlyPlan
+  );
 
 router
   .route("/")
-  .get(authController.protecc, tourController.getTours)
-  .post(tourController.createTour);
+  .get(tourController.getTours)
+  .post(
+    authController.protecc,
+    authController.restricTo("admin", "lead-guides"),
+    tourController.createTour
+  );
 
 router
   .route("/:id")
   .get(tourController.getTour)
-  .patch(tourController.updateTour)
+  .patch(
+    authController.protecc,
+    authController.restricTo("admin", "lead-guides"),
+    tourController.updateTour
+  )
   .delete(
     authController.protecc,
     authController.restricTo("admin", "lead-guide"),
