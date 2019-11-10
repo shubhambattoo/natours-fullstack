@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
@@ -13,6 +14,10 @@ const userRouter = require("./routes/userRoutes");
 const reviewRouter = require("./routes/reviewRoutes");
 
 const app = express();
+
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use(helmet());
 
@@ -48,8 +53,6 @@ app.use(
   })
 );
 
-app.use(express.static(`${__dirname}/public`));
-
 // app.use((req, res, next) => {
 //   // console.log("hello middleware");
 //   next();
@@ -58,6 +61,13 @@ app.use(express.static(`${__dirname}/public`));
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
+});
+
+app.get("/", (req, res) => {
+  res.render("base", {
+    tour: "The Forrest Hiker",
+    user: "La Flame"
+  });
 });
 
 app.use("/api/v1/tours", tourRouter);
