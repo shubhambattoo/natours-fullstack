@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 html(lang="en")
 	head
-		meta(charset="UTF-8")
-		meta(name="viewport", content="width=device-width, initial-scale=1.0")
-		meta(http-equiv="X-UA-Compatible", content="ie=edge")
-		title Natours | #{title}
-		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Lato:300,300i,700")
-		link(rel="stylesheet", href="/css/style.css")
-		link(rel="shortcut icon", href="/img/favicon.png", type="image/x-icon")
+		block head
+			meta(charset="UTF-8")
+			meta(name="viewport", content="width=device-width, initial-scale=1.0")
+			meta(http-equiv="X-UA-Compatible", content="ie=edge")
+			title Natours | #{title}
+			link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Lato:300,300i,700")
+			link(rel="stylesheet", href="/css/style.css")
+			link(rel="shortcut icon", href="/img/favicon.png", type="image/x-icon")
 
 	body
 		include _header
@@ -15,5 +16,5 @@ html(lang="en")
 		//- Content
 		block content
 			h1 This is a placeholder heading
-
+		script(src="/js/mapbox.js")
 		include _footer
