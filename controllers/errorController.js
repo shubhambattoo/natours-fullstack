@@ -2,15 +2,23 @@ const AppError = require("./../utils/appError");
 /**
  * Sends error response in the development env
  * @param {any} err error object
- * @param {any} res response objetc of Expess
+ * @param {any} res response object of Expess
  */
-const sendErrorDev = (err, res) => {
-  // console.log(err.isOperational);
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-    error: err,
-    stack: err.stack
+const sendErrorDev = (err, req, res) => {
+  if (req.originalUrl.startsWith("/api")) {
+    // console.log(err.isOperational);
+    return res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+      error: err,
+      stack: err.stack
+    });
+  }
+  // eslint-disable-next-line no-console
+  console.error(`ERROR`, err);
+  return res.status(err.statusCode).render("error", {
+    title: "Something went wrong!",
+    msg: err.message
   });
 };
 
@@ -53,24 +61,42 @@ const handleTokenExpiredError = () =>
  * @example
  * sendErrorProd(err, res);
  */
-const sendErrorProd = (err, res) => {
-  // Operational, Trusted error : send message to client
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message
-    });
-    // Programming error, where we dont want to leak info
-  } else {
+const sendErrorProd = (err, req, res) => {
+  if (req.originalUrl.startsWith("/api")) {
+    // Operational, Trusted error : send message to client
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message
+      });
+      // Programming error, where we dont want to leak info
+    }
     // 1) log to console
     // eslint-disable-next-line no-console
     console.error(`ERROR`, err);
     // 2) send generic message
-    res.status(500).json({
+    return res.status(500).json({
       status: "error",
       message: "something went wrong"
     });
   }
+
+  if (err.isOperational) {
+    return res.status(err.statusCode).render("error", {
+      title: "Something went wrong!",
+      msg: err.message
+    });
+    // Programming error, where we dont want to leak info
+  }
+
+  // 1) log to console
+  // eslint-disable-next-line no-console
+  console.error(`ERROR`, err);
+  // 2) send generic message
+  return res.status(err.statusCode).render("error", {
+    title: "Something went wrong!",
+    msg: "Please try again later."
+  });
 };
 
 module.exports = (err, req, res, next) => {
@@ -78,7 +104,7 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || "error";
 
   if (process.env.NODE_ENV === "development") {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === "production") {
     let error = { ...err };
 
@@ -94,6 +120,6 @@ module.exports = (err, req, res, next) => {
     if (error.name === "TokenExpiredError")
       error = handleTokenExpiredError(error);
 
-    sendErrorProd(error, res);
+    sendErrorProd(error, req, res);
   }
 };
