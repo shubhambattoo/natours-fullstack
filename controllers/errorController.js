@@ -1,4 +1,5 @@
 const AppError = require("./../utils/appError");
+
 /**
  * Sends error response in the development env
  * @param {any} err error object

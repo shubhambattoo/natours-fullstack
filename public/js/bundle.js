@@ -8874,12 +8874,14 @@ if (loginForm) {
 if (userDataForm) {
   userDataForm.addEventListener("submit", function (e) {
     e.preventDefault();
+    var formData = new FormData();
     var email = document.getElementById("email").value;
     var name = document.getElementById("name").value;
-    (0, _updateSettings.updateSettings)({
-      name: name,
-      email: email
-    }, "data");
+    var photo = document.getElementById("photo").files[0];
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("photo", photo);
+    (0, _updateSettings.updateSettings)(formData, "data");
   });
 }
 
@@ -8946,7 +8948,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "45237" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "38507" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
