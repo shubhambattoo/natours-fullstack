@@ -4,7 +4,7 @@ const { promisify } = require("util");
 const User = require("./../models/userModel");
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("./../utils/appError");
-const sendEmail = require("./../utils/email");
+const Email = require("./../utils/email");
 
 const signToken = (id, email) => {
   return jwt.sign({ id, email }, process.env.JWT_SECRET, {
@@ -42,6 +42,8 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
     passwordChangedAt: req.body.passwordChangedAt
   });
+  const url = `${req.protocol}://${req.get("host")}:3000/me`;
+  await new Email(newUser, url).sendWelcome();
   createAndSendToken(newUser, 201, res, true);
 });
 
@@ -168,11 +170,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const message = `Forgot your password? Submit a PATCH request with your password and passwordConfirm to ${resetUrl}.\n If you didnt forget your password ignore this email.`;
 
   try {
-    await sendEmail({
-      email: user.email,
-      subject: "Your password reset steps {valid for 10 mins}",
-      message
-    });
+    // await sendEmail({
+    //   email: user.email,
+    //   subject: "Your password reset steps {valid for 10 mins}",
+    //   message
+    // });
 
     res.status(200).json({
       status: "success",
