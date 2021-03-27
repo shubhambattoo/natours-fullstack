@@ -5,7 +5,7 @@ import { showAlert } from "./alerts";
 export const updateData = async (name, email) => {
   try {
     const res = await axios.patch(
-      "http://localhost:3000/api/v1/users/updateMe",
+      "/api/v1/users/updateMe",
       {
         name,
         email
@@ -30,8 +30,8 @@ export const updateSettings = async (data, type) => {
   try {
     const uri =
       type === "data"
-        ? "http://localhost:3000/api/v1/users/updateMe"
-        : "http://localhost:3000/api/v1/users/updateMyPassword";
+        ? "/api/v1/users/updateMe"
+        : "/api/v1/users/updateMyPassword";
 
     const res = await axios.patch(uri, data);
 
