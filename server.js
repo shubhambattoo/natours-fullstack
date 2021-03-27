@@ -10,8 +10,14 @@ process.on("uncaughtException", err => {
   process.exit(1);
 });
 
+let dbUrl = process.env.DATABASE_HOST + process.env.DATABASE_NAME;
+
+if (process.env.NODE_ENV === "production") {
+  dbUrl = process.env.DATABASE_HOST;
+}
+
 mongoose
-  .connect(process.env.DATABASE_LOCAL, {
+  .connect(dbUrl, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
