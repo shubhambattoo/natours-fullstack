@@ -4,9 +4,9 @@ const dotenv = require("dotenv");
 
 dotenv.config({ path: "./config.env" });
 const mongoose = require("mongoose");
-const Tour = require("./../../models/tourModel");
-const Review = require("./../../models/reviewModel");
-const User = require("./../../models/userModel");
+const Tour = require("../../models/tourModel");
+const Review = require("../../models/reviewModel");
+const User = require("../../models/userModel");
 
 mongoose
   .connect(process.env.DATABASE_LOCAL, {

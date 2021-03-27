@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const dotenv = require("dotenv");
 
 dotenv.config({ path: "./config.env" });

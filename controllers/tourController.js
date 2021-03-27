@@ -1,9 +1,9 @@
 const multer = require("multer");
 const sharp = require("sharp");
-const Tour = require("./../models/tourModel");
-const catchAsync = require("./../utils/catchAsync");
+const Tour = require("../models/tourModel");
+const catchAsync = require("../utils/catchAsync");
 const factory = require("./handlerFactory");
-const AppError = require("./../utils/appError");
+const AppError = require("../utils/appError");
 // const checkId = (req, res, next, val) => {
 //   console.log(`Tour id is ${val}`);
 //   const id = parseInt(val);
