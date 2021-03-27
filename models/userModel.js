@@ -108,7 +108,6 @@ userSchema.pre(/^find/, function(next) {
   next();
 });
 
-// eslint-disable-next-line new-cap
-const User = new mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
