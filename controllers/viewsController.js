@@ -10,6 +10,7 @@ exports.alerts = (req, res, next) => {
     res.locals.alert =
       "Your booking was successful! Check your email for confirmation.If your booking doesnt show up here immediatly, please come back later.";
   }
+  next();
 };
 
 exports.getOverview = catchAsync(async (req, res, next) => {
