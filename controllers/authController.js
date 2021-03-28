@@ -12,15 +12,16 @@ const signToken = (id, email) => {
   });
 };
 
-const createAndSendToken = (user, statusCode, res, sendUser = false) => {
+const createAndSendToken = (user, statusCode, req, res, sendUser = false) => {
   const token = signToken(user._id, user.email);
   const time = process.env.JWT_COOKIE_EXPIRES_IN * 60 * 60 * 1000;
   const cookieOptions = {
     expires: new Date(Date.now + time),
-    httpOnly: true
+    httpOnly: true,
+    secure: req.secure || req.headers("x-headers-proto") === "https"
   };
 
-  if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
+  // if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
 
   res.cookie("jwt", token, cookieOptions);
 
@@ -44,7 +45,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   });
   const url = `${req.protocol}://${req.get("host")}/me`;
   await new Email(newUser, url).sendWelcome();
-  createAndSendToken(newUser, 201, res, true);
+  createAndSendToken(newUser, 201, req, res, true);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -59,7 +60,7 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!user || !(await user.comparePassword(password, user.password))) {
     return next(new AppError(`Incorrect email or password`, 401));
   }
-  createAndSendToken(user, 200, res);
+  createAndSendToken(user, 200, req, res);
 });
 
 exports.logout = (req, res) => {
@@ -214,7 +215,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   await user.save();
   // update the password and changedPasswordAt
   // log the user in, send JWT
-  createAndSendToken(user, 200, res);
+  createAndSendToken(user, 200, req, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -238,5 +239,5 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   user.passwordConfirm = req.body.passwordConfirm;
   await user.save();
   // log user in send JWT
-  createAndSendToken(user, 201, res);
+  createAndSendToken(user, 201, req, res);
 });
