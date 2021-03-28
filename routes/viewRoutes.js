@@ -1,7 +1,7 @@
 const express = require("express");
 const viewController = require("../controllers/viewsController");
 const authController = require("../controllers/authController");
-const bookingController = require("../controllers/bookingController");
+// const bookingController = require("../controllers/bookingController");
 
 const router = express.Router();
 
@@ -13,12 +13,7 @@ router.post(
   viewController.updateUserData
 );
 
-router.get(
-  "/",
-  bookingController.createBookingCheckout,
-  authController.isLoggedIn,
-  viewController.getOverview
-);
+router.get("/", authController.isLoggedIn, viewController.getOverview);
 router.use(authController.isLoggedIn);
 router.get("/tour/:slug", viewController.getTour);
 router.get("/login", viewController.getLoginForm);
